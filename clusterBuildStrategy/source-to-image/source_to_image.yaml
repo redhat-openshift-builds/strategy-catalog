@@ -115,11 +115,12 @@ spec:
             --registries-conf=/tmp/registries.conf \
             --tag="${image}"
 
-          # Write the image
-          echo "[INFO] Writing image ${image}"
+          # Push the image
+          echo "[INFO] Pushing image ${image}"
           buildah --storage-driver=$(params.storage-driver) push \
+            --digestfile='$(results.shp-image-digest.path)' \
             "${image}" \
-            "oci:${target}"
+            "docker://${image}"
         # That's the separator between the shell script and its args
         - --
         - --image
@@ -130,8 +131,6 @@ spec:
         - $(params.registries-insecure[*])
         - --registries-search
         - $(params.registries-search[*])
-        - --target
-        - $(params.shp-output-directory)
       volumeMounts:
         - name: s2i
           mountPath: /s2i

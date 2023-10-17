@@ -6,7 +6,7 @@ The `source-to-image` ClusterBuildStrategy is composed of [source-to-image](http
 ## Install the Strategy
 
 ```
-$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/buildah/source_to_image.yaml
+$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/source-to-image/source_to_image.yaml
 ```
 
 ## Usage
