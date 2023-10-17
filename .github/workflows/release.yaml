@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Desired tag'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.release }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Sync strategies
+      run: |
+        rm -rf release-strategies.yaml
+        for file in `ls clusterBuildStrategy/**/*.yaml`
+        do 
+          cat $file >> release-strategies.yaml
+        done
+    - name: Generate and upload release.yaml
+      env:
+        REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        REGISTRY_USERNAME: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create ${TAG}
+        gh release upload ${TAG} release-strategies.yaml
