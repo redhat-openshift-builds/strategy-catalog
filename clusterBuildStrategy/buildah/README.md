@@ -21,7 +21,7 @@ spec:
       url: https://github.com/shipwright-io/sample-go
     contextDir: docker-build
   strategy:
-    name: buildah-strategy-managed-push
+    name: buildah
     kind: ClusterBuildStrategy
   paramValues:
   - name: dockerfile

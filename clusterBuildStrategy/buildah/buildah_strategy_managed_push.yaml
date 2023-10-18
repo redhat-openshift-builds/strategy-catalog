@@ -2,7 +2,7 @@
 apiVersion: shipwright.io/v1beta1
 kind: ClusterBuildStrategy
 metadata:
-  name: buildah-strategy-managed-push
+  name: buildah
 spec:
   steps:
     - name: build-and-push

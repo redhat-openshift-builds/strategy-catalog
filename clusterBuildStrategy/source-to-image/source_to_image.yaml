@@ -2,7 +2,7 @@
 apiVersion: shipwright.io/v1beta1
 kind: ClusterBuildStrategy
 metadata:
-  name: source-to-image-redhat
+  name: source-to-image
 spec:
   volumes:
     - name: s2i
