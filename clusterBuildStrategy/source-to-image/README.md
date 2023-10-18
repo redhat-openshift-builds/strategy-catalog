@@ -23,7 +23,7 @@ spec:
       url: https://github.com/shipwright-io/sample-nodejs
     contextDir: source-build/
   strategy:
-    name: source-to-image-redhat
+    name: source-to-image
     kind: ClusterBuildStrategy
   paramValues:
   - name: builder-image
