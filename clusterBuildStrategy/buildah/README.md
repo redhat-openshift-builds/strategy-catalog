@@ -4,7 +4,7 @@ The `buildah` ClusterBuildStrategy uses [buildah](https://github.com/containers/
 ## Install the Strategy
 
 ```
-$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/buildah/buildah_strategy_managed_push.yaml
+$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/buildah/buildah.yaml
 ```
 
 ## Usage
