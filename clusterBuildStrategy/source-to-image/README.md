@@ -1,7 +1,11 @@
 # Source-To-Image (S2I) ClusterBuildStrategy
-The `source-to-image` ClusterBuildStrategy is composed of [source-to-image](https://github.com/openshift/source-to-image/) and [buildah](https://github.com/containers/buildah) in order to generate a `Dockerfile` and prepare the application to be built later with a builder-image.
 
-`s2i` requires a specially crafted image, which can be informed as `builder-image` parameter on the `Build` resource.
+The `source-to-image` ClusterBuildStrategy allows source code to be compiled and packaged into a
+container image using the [source-to-image](https://github.com/openshift/source-to-image) tool.
+Its functionality is similar to the `Source` build strategy using
+[OpenShift BuildConfigs](https://docs.openshift.com/container-platform/latest/cicd/builds/build-strategies.html#builds-strategy-s2i-build_build-strategies-docker)
+
+Developers must provide an s2i-enabled builder image as the base image, using the `builder-image` parameter.
 
 ## Install the Strategy
 
@@ -10,7 +14,13 @@ $ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-build
 ```
 
 ## Usage
-This Build uses source-to-image-redhat strategy to build an image, and pushes the built image to a quay repository (`output.image`).
+
+This example uses the source-to-image strategy to build an image, and pushes the built image to a quay repository (`output.image`).
+It assumes the following:
+
+- The Samples Operator is enabled and installed the default OpenShift ImageStreams.
+- `<my-repo>` is a quay.io user or organization repository, and that the secret
+  `registry-credential` contains credentials that allow the build to push images to the repository.
 
 ```yaml
 apiVersion: shipwright.io/v1beta1
@@ -27,12 +37,12 @@ spec:
     kind: ClusterBuildStrategy
   paramValues:
   - name: builder-image
-    value: "quay.io/centos7/nodejs-12-centos7"
+    value: image-registry.openshift-image-registry.svc:5000/openshift/nodejs:16-ubi9
   - name: registries-block
     values:
     - value: docker.io 
   output:
-    image: quay.io/repo/s2i-nodejs-example
+    image: quay.io/<my-repo>/s2i-nodejs-example
     pushSecret: registry-credential
 ```
 
