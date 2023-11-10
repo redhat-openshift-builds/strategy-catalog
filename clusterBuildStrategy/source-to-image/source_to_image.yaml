@@ -1,5 +1,5 @@
 ---
-apiVersion: shipwright.io/v1beta1
+apiVersion: shipwright.io/v1alpha1
 kind: ClusterBuildStrategy
 metadata:
   name: source-to-image
@@ -7,7 +7,7 @@ spec:
   volumes:
     - name: s2i
       emptyDir: {}
-  steps:
+  buildSteps:
     - name: s2i-generate
       image: registry.redhat.io/ocp-tools-43-tech-preview/source-to-image-rhel8:latest
       workingDir: $(params.shp-source-root)
@@ -16,7 +16,7 @@ spec:
       args:
         - build
         - $(params.shp-source-context)
-        - $(params.builder-image)
+        - $(build.builder.image)
         - $(params.shp-output-image)
         - --as-dockerfile=/s2i/Dockerfile
       volumeMounts:
@@ -149,9 +149,6 @@ spec:
       defaults:
         - registry.redhat.io
         - quay.io
-    - name: builder-image
-      description: The builder image.
-      type: string
     - name: storage-driver
       description: "The storage driver to use, such as 'overlay' or 'vfs'."
       type: string
