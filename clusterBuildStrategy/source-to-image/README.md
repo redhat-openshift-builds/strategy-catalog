@@ -43,5 +43,5 @@ spec:
 | registries-block | array | List of registries that needs to be blocked | [] |
 | registries-insecure | array | FQDN of required insecure registries | [] |
 | registries-search | array | List of registries that are preferred when short name images are specified | ["registry.redhat.io", "quay.io"] |
-| builder-image | string | Location of the builder-image | "" |
+| builder-image | string | Location of the builder-image | - |
 | storage-driver | string | The storage drivers to be used by buildah ("overlay" or "vfs") | "vfs" |
