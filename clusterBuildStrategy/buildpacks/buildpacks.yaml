@@ -1,0 +1,234 @@
+---
+apiVersion: shipwright.io/v1beta1
+kind: ClusterBuildStrategy
+metadata:
+  name: buildpacks
+spec:
+  volumes:
+    - name: layers-dir
+      emptyDir: {}
+    - name: empty-dir
+      emptyDir: {}
+    - name: cache-dir
+      emptyDir: {}
+  parameters:
+    - name: cnb-platform-api
+      description: Platform API Version supported
+      default: "0.12"
+    - name: cnb-builder-image
+      description: Builder image containing the buildpacks
+      default: ""
+    - name: cnb-lifecycle-image
+      description: The image to use when executing Lifecycle phases.
+      default: "docker.io/buildpacksio/lifecycle:0.17.0"
+    - name: app-image
+      description: The name of where to store the app image.
+    - name: run-image
+      description: Reference to a run image to use.
+      default: ""
+    - name: cache-image
+      description: The name of the persistent app cache image (if no cache workspace is provided).
+      default: ""
+    - name: cache-dir-name
+      description: Directory to cache files
+      default: cache
+    - name: process-type
+      description: The default process type to set on the image.
+      default: ""
+    - name: source-subpath
+      description: A subpath within the `source` input where the source to build is located.
+      default: ""
+    - name: env-vars
+      type: array
+      description: Environment variables to set during _build-time_.
+      defaults: []
+    - name: platform-dir
+      description: The name of the platform directory.
+      default: empty-dir
+    - # Update the user id to use new paketo builder image till we can use: https://github.com/shipwright-io/community/blob/main/ships/0036-runAs-for-supporting-steps.md
+      name: user-id
+      description: The user ID of the builder image user.
+      default: "1001"
+    - name: group-id
+      description: The group ID of the builder image user.
+      default: "1000"
+    - name: user-home
+      description: Absolute path to the user's home directory.
+      default: /tekton/home
+    - name: cache-pvc-name  # Custom parameter for cache PVC name
+      description: Name of the Persistent Volume Claim for cache
+      default: "ws-pvc"
+  steps:
+    - name: prepare
+      image: registry.access.redhat.com/ubi8/ubi:8.8-1067.1698056881
+      args:
+        - -c
+        - |
+          set -e
+
+          # TODO: To be reviewed
+          echo "> Creating the cache directory if it is not empty"
+          if [ ! -d "$DIRECTORY" ]; then
+            echo "> Creating cache: /layers/$(params.cache-dir-name)"
+            mkdir -p /layers/$(params.cache-dir-name)
+            chown -R "$(params.user-id):$(params.group-id)" /layers/$(params.cache-dir-name)
+          fi
+          
+          # TODO: To be reviewed as shipwright don't support like Tekton workspaces
+          #if [[ "$(workspaces.cache.bound)" == "true" ]]; then
+          #  echo "> Setting permissions on '$(workspaces.cache.path)'..."
+          #  chown -R "$(params.user-id):$(params.group-id)" "$(workspaces.cache.path)"
+          #fi
+
+          for path in "/tekton/home" "/layers" "$(workspaces.source.path)"; do
+            echo "> Setting permissions on '$path'..."
+            chown -R "$(params.user-id):$(params.group-id)" "$path"
+          done
+
+          echo "> Parsing additional configuration..."
+          parsing_flag=""
+          envs=()
+          for arg in "$@"; do
+              if [[ "$arg" == "--env-vars" ]]; then
+                  echo "-> Parsing env variables..."
+                  parsing_flag="env-vars"
+              elif [[ "$parsing_flag" == "env-vars" ]]; then
+                  envs+=("$arg")
+              fi
+          done
+
+          echo "> Processing any environment variables..."
+          ENV_DIR="/platform/env"
+
+          echo "--> Creating 'env' directory: $ENV_DIR"
+          mkdir -p "$ENV_DIR"
+
+          for env in "${envs[@]}"; do
+              IFS='=' read -r key value string <<< "$env"
+              if [[ "$key" != "" && "$value" != "" ]]; then
+                  path="${ENV_DIR}/${key}"
+                  echo "--> Writing ${path}..."
+                  echo -n "$value" > "$path"
+              fi
+          done
+        # That's the separator between the shell script and its args
+        - --
+        - --env-vars
+        - $(params.env-vars[*])
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: empty-dir #name: --> DON'T WORK : $(params.platform-dir)
+          mountPath: /platform
+        - name: cache-dir #name: --> DON'T WORK : $(params.cache-dir-name)
+          mountPath: /tmp/cache
+    - name: analyze
+      image: $(params.cnb-lifecycle-image)
+      command: ["/cnb/lifecycle/analyzer"]
+      args:
+        - "-layers=/layers"
+        - "-run-image=$(params.run-image)"
+        - "-cache-image=$(params.cache-image)"
+        - "-uid=$(params.user-id)"
+        - "-gid=$(params.group-id)"
+        - "$(params.app-image)"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+    - name: detect
+      image: $(params.cnb-builder-image)
+      imagePullPolicy: Always
+      command: [ "/cnb/lifecycle/detector" ]
+      args:
+        - "-app=$(workspaces.source.path)/$(params.source-subpath)"
+        - "-group=/layers/group.toml"
+        - "-plan=/layers/plan.toml"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: empty-dir # Hard coded the name as substitution do not work: $(params.platform-dir)
+          mountPath: /platform
+        - name: empty-dir
+          mountPath: /tekton/home
+    - name: restore
+      image: $(params.cnb-lifecycle-image)
+      imagePullPolicy: Always
+      command: ["/cnb/lifecycle/restorer"]
+      args:
+        - "-group=/layers/group.toml"
+        - "-layers=/layers"
+        - "-cache-dir=/layers/$(params.cache-dir-name)"
+        - "-cache-image=$(params.cache-image)"
+        - "-uid=$(params.user-id)"
+        - "-gid=$(params.group-id)"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: cache-dir
+          mountPath: /tmp/cache #name: --> DON'T WORK : $(params.cache-dir-name)
+    - name: build-and-push
+      image: $(params.cnb-builder-image)
+      imagePullPolicy: Always
+      securityContext:
+        # runAsUser: 1001 # Won't work : $(params.user-id) -> https://github.com/shipwright-io/build/issues/1354
+        runAsGroup: 1000 # Won't work : $(params.group-id) -> https://github.com/shipwright-io/build/issues/1354
+      command: ["/cnb/lifecycle/builder"]
+      args:
+        - "-app=$(workspaces.source.path)/$(params.source-subpath)"
+        - "-layers=/layers"
+        - "-group=/layers/group.toml"
+        - "-plan=/layers/plan.toml"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: empty-dir # Hard coded the name as substitution do not work: $(params.platform-dir)
+          mountPath: /platform
+        - name: empty-dir
+          mountPath: /tekton/home
+        - name: cache-dir
+          mountPath: /tmp/cache #name: --> DON'T WORK : $(params.cache-dir-name)
+    - name: export
+      image: $(params.cnb-lifecycle-image)
+      imagePullPolicy: Always
+      command: ["/cnb/lifecycle/exporter"]
+      args:
+        - "-app=$(workspaces.source.path)/$(params.source-subpath)"
+        - "-layers=/layers"
+        - "-group=/layers/group.toml"
+        - "-cache-dir=/layers/$(params.cache-dir-name)"
+        - "-cache-image=$(params.cache-image)"
+        - "-report=/layers/report.toml"
+        - "-process-type=$(params.process-type)"
+        - "-uid=$(params.user-id)"
+        - "-gid=$(params.group-id)"
+        - "$(params.app-image)"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: cache-dir
+          mountPath: /tmp/cache #name: --> DON'T WORK : $(params.cache-dir-name)
+    - name: results
+      image: registry.access.redhat.com/ubi8/ubi:8.8-1067.1698056881
+      args:
+        - -c
+        - |
+          set -e
+          cat /layers/report.toml | grep "digest" | cut -d'"' -f2 | cut -d'"' -f2 | tr -d '\n' > $(results.shp-image-digest.path)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
