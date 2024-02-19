@@ -1,5 +1,5 @@
 # Buildpacks ClusterBuildStrategy
-The `buildpacks` ClusterBuildStrategy uses [buildpacks](https://buildpacks.io/) to efficiently build and push a container image based on the source code, without the need for a traditional Dockerfile. Instead of a Dockerfile, configuration details are provided through parameters in the Build resource.
+The `buildpacks` ClusterBuildStrategy uses [buildpacks](https://buildpacks.io/) to efficiently build and push a container image based on the source code, without the need for a traditional Dockerfile. Instead of a Dockerfile, configuration details are provided through parameters in the `Build` resource.
 
 ## Install the Strategy
 
@@ -8,7 +8,7 @@ $ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-build
 ```
 
 ## Usage
-This Build uses buildpacks strategy to build an image , and pushes the built image to OpenShift's internal registry (`output.image`).
+This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
 
 ```yaml
 apiVersion: shipwright.io/v1beta1
