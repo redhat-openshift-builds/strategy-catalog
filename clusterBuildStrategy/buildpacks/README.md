@@ -40,7 +40,7 @@ spec:
 | ------------------ | ------ | ----------------------------------------------------- | --------------------------------------------- |
 | cnb-platform-api   | string | Platform API Version supported                        | "0.12"                                        |
 | cnb-builder-image  | string | Builder image containing the buildpacks               | ""                                            |
-| cnb-lifecycle-image | string | Image to use when executing Lifecycle phases          | "docker.io/buildpacksio/lifecycle:0.17.0"      |                                          |
+| cnb-lifecycle-image | string | Image to use when executing Lifecycle phases          | "docker.io/buildpacksio/lifecycle:0.17.0"                                     |
 | run-image          | string | Reference to a run image to use                        | ""                                            |
 | cache-image        | string | Name of the persistent app cache image                 | ""                                            |
 | cache-dir-name     | string | Directory to cache files                               | "cache"                                       |
