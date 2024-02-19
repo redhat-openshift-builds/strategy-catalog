@@ -31,8 +31,6 @@ spec:
       value: paketocommunity/run-ubi-base:latest
     - name: cnb-builder-image
       value: paketobuildpacks/builder-jammy-tiny:0.0.176
-    - name: app-image
-      value: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
   output:
     image: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
 ```
@@ -42,8 +40,7 @@ spec:
 | ------------------ | ------ | ----------------------------------------------------- | --------------------------------------------- |
 | cnb-platform-api   | string | Platform API Version supported                        | "0.12"                                        |
 | cnb-builder-image  | string | Builder image containing the buildpacks               | ""                                            |
-| cnb-lifecycle-image | string | Image to use when executing Lifecycle phases          | "docker.io/buildpacksio/lifecycle:0.17.0"      |
-| app-image          | string | Name of where to store the app image                   | N/A                                           |
+| cnb-lifecycle-image | string | Image to use when executing Lifecycle phases          | "docker.io/buildpacksio/lifecycle:0.17.0"      |                                          |
 | run-image          | string | Reference to a run image to use                        | ""                                            |
 | cache-image        | string | Name of the persistent app cache image                 | ""                                            |
 | cache-dir-name     | string | Directory to cache files                               | "cache"                                       |

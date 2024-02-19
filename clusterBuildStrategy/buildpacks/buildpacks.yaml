@@ -21,8 +21,6 @@ spec:
     - name: cnb-lifecycle-image
       description: The image to use when executing Lifecycle phases.
       default: "docker.io/buildpacksio/lifecycle:0.17.0"
-    - name: app-image
-      description: The name of where to store the app image.
     - name: run-image
       description: Reference to a run image to use.
       default: ""
@@ -131,7 +129,7 @@ spec:
         - "-cache-image=$(params.cache-image)"
         - "-uid=$(params.user-id)"
         - "-gid=$(params.group-id)"
-        - "$(params.app-image)"
+        - "$(params.shp-output-image)"
       env:
         - name: CNB_PLATFORM_API
           value: $(params.cnb-platform-api)
@@ -213,7 +211,7 @@ spec:
         - "-process-type=$(params.process-type)"
         - "-uid=$(params.user-id)"
         - "-gid=$(params.group-id)"
-        - "$(params.app-image)"
+        - "$(params.shp-output-image)"
       env:
         - name: CNB_PLATFORM_API
           value: $(params.cnb-platform-api)
