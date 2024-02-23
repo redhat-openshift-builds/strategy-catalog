@@ -19,7 +19,7 @@ This example uses the source-to-image strategy to build an image, and pushes the
 It assumes the following:
 
 - The Samples Operator is enabled and installed the default OpenShift ImageStreams.
-- `<my-repo>` is a quay.io user or organization repository, and that the secret
+- `<my-repo>` is a quay.io user or organization repository, and the secret
   `registry-credential` contains credentials that allow the build to push images to the repository.
 
 ```yaml
