@@ -1,5 +1,8 @@
 # Buildah ClusterBuildStrategy
-The `buildah` ClusterBuildStrategy uses [buildah](https://github.com/containers/buildah) to build and push a container image, out of a `Dockerfile`. The `Dockerfile` should be specified using a parameter in the `Build` resource.
+
+The `buildah` ClusterBuildStrategy uses [buildah](https://github.com/containers/buildah) to build
+and push a container image, out of a `Dockerfile` or `Containerfile`. The `Dockerfile` should be
+specified using the `dockerfile` parameter in the `Build` resource.
 
 ## Install the Strategy
 
@@ -8,7 +11,10 @@ $ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-build
 ```
 
 ## Usage
-This Build uses buildah strategy to build an image using a Dockerfile, and pushes the built image to OpenShift's internal registry (`output.image`).
+
+This example uses the buildah strategy to build an image using a Dockerfile, and pushes the image
+to OpenShift's internal registry (`output.image`). The following example assumes the OpenShift
+internal registry is enabled and the `BuildRun` executes in the `buildah-sample` namespace:
 
 ```yaml
 apiVersion: shipwright.io/v1beta1
