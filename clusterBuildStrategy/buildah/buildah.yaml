@@ -24,6 +24,7 @@ spec:
           dockerfile=
           image=
           buildArgs=()
+          target=""
           inBuildArgs=false
           registriesBlock=""
           inRegistriesBlock=false
@@ -77,6 +78,13 @@ spec:
               inBuildArgs=false
               inRegistriesBlock=false
               inRegistriesInsecure=false
+            elif [ "${arg}" == "--target" ]; then
+              inBuildArgs=false
+              inRegistriesBlock=false
+              inRegistriesInsecure=false
+              inRegistriesSearch=false
+              target="$1"
+              shift
             elif [ "${inBuildArgs}" == "true" ]; then
               buildArgs+=("--build-arg" "${arg}")
             elif [ "${inRegistriesBlock}" == "true" ]; then
@@ -143,6 +151,7 @@ spec:
             --registries-conf=/tmp/registries.conf \
             --tag="${image}" \
             --file="${dockerfile}" \
+            ${target:+--target="${target}"} \
             .
 
           # Push the image
@@ -168,7 +177,9 @@ spec:
         - $(params.registries-insecure[*])
         - --registries-search
         - $(params.registries-search[*])
-        volumeMounts:
+        - --target
+        - $(params.target)
+      volumeMounts:
         - mountPath: /etc/pki/entitlement
           name: etc-pki-entitlement
       resources:
@@ -202,6 +213,10 @@ spec:
       type: string
       default: "vfs"
       # For details see the "--storage-driver" section of https://github.com/containers/buildah/blob/main/docs/buildah.1.md#options
+    - name: target
+      description: "Sets the target stage to build"
+      type: string
+      default: ""
   volumes:
     - name: etc-pki-entitlement
       emptydir: {}
