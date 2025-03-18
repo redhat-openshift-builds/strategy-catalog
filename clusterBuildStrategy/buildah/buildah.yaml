@@ -1,10 +1,10 @@
 ---
-apiVersion: shipwright.io/v1alpha1
+apiVersion: shipwright.io/v1beta1
 kind: ClusterBuildStrategy
 metadata:
   name: buildah
 spec:
-  buildSteps:
+  steps:
     - name: build-and-push
       image: registry.redhat.io/ubi8/buildah:8.10-9
       imagePullPolicy: Always
@@ -148,7 +148,6 @@ spec:
 
           # Building the image
           echo "[INFO] Building image ${image}"
-
           buildah --storage-driver=$(params.storage-driver) \
             bud "${budArgs[@]}" \
             --registries-conf=/tmp/registries.conf \
@@ -168,7 +167,7 @@ spec:
         - --context
         - $(params.shp-source-context)
         - --dockerfile
-        - $(build.dockerfile)
+        - $(params.dockerfile)
         - --image
         - $(params.shp-output-image)
         - --build-args
@@ -210,6 +209,10 @@ spec:
       defaults:
         - registry.redhat.io
         - quay.io
+    - name: dockerfile
+      description: The path to the Dockerfile to be used for building the image.
+      type: string
+      default: "Dockerfile"
     - name: storage-driver
       description: "The storage driver to use, such as 'overlay' or 'vfs'"
       type: string
