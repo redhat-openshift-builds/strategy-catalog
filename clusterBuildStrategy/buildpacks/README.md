@@ -8,7 +8,9 @@ $ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-build
 ```
 
 ## Usage
-This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
+This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). This example also has support for "extender mode" which allows you to modify the builder or run image using a Dockerfile. This is useful for installing system dependencies or applying security configurations that standard buildpacks cannot. The Dockerfile is typically provided by a buildpack that supports extensions.
+To use the extender, you set the cnb-extender-kind parameter in your Build resource. The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
+
 
 ```yaml
 apiVersion: shipwright.io/v1beta1
