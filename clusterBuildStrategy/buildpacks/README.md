@@ -8,7 +8,9 @@ $ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-build
 ```
 
 ## Usage
-This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
+This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). This example also has support for "extender mode" which allows you to modify the builder or run image using a Dockerfile. This is useful for installing system dependencies or applying security configurations that standard buildpacks cannot. The Dockerfile is typically provided by a buildpack that supports extensions.
+To use the extender, you set the cnb-extender-kind parameter in your Build resource. The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
+
 
 ```yaml
 apiVersion: shipwright.io/v1beta1
@@ -19,8 +21,7 @@ spec:
   source:
     type: Git
     git: 
-      url: https://github.com/ayushsatyam146/node-example.git
-    contextDir: source-build
+      url: https://github.com/redhat-openshift-builds/samples.git
   strategy:
     name: buildpacks
     kind: ClusterBuildStrategy
@@ -28,27 +29,32 @@ spec:
     atBuildDeletion: true
   paramValues:
     - name: run-image
-      value: paketocommunity/run-ubi-base:latest
+      value: paketobuildpacks/run-ubi8-base:latest
     - name: cnb-builder-image
-      value: paketobuildpacks/builder-jammy-tiny:0.0.176
+      value: paketobuildpacks/builder-jammy-tiny:0.0.344
+    - name: source-subpath
+      value: "buildpacks"
   output:
     image: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
 ```
 
 ## Parameters
-| Name               | Type   | Description                                           | Default                                       |
-| ------------------ | ------ | ----------------------------------------------------- | --------------------------------------------- |
-| cnb-platform-api   | string | Platform API Version supported                        | "0.12"                                        |
-| cnb-builder-image  | string | Builder image containing the buildpacks               | ""                                            |
-| cnb-lifecycle-image | string | Image to use when executing Lifecycle phases          | "docker.io/buildpacksio/lifecycle:0.17.0"                                     |
-| run-image          | string | Reference to a run image to use                        | ""                                            |
-| cache-image        | string | Name of the persistent app cache image                 | ""                                            |
-| cache-dir-name     | string | Directory to cache files                               | "cache"                                       |
-| process-type       | string | Default process type to set on the image               | ""                                            |
-| source-subpath     | string | Subpath within the `source` input where the source to build is located | ""                             |
-| env-vars           | array  | Environment variables to set during _build-time_      | []                                            |
-| platform-dir       | string | Name of the platform directory                         | "empty-dir"                                   |
-| user-id            | string | User ID of the builder image user                      | "1001"                                        |
-| group-id           | string | Group ID of the builder image user                     | "1000"                                        |
-| user-home          | string | Absolute path to the user's home directory             | "/tekton/home"                                |
-| cache-pvc-name     | string | Name of the Persistent Volume Claim for cache          | "ws-pvc"                                      |
+
+| Name                      | Type   | Description                                                                      | Default                     |
+|---------------------------|--------|----------------------------------------------------------------------------------|----------------------------|
+| cnb-platform-api         | string | Platform API Version supported                                                  | "0.12"                     |
+| cnb-builder-image         | string | Builder image containing the buildpacks                                         | ""                         |
+| cnb-lifecycle-image       | string | Image to use when executing Lifecycle phases                                    | "buildpacksio/lifecycle:0.20.8" |
+| cnb-log-level             | string | Logging levels                                                                   | "debug"                    |
+| run-image                 | string | Reference to a run image to use                                                 | ""                         |
+| cache-image               | string | Name of the persistent app cache image                                          | ""                         |
+| process-type              | string | Default process type to set on the image                                        | ""                         |
+| source-subpath            | string | Subpath within the `source` input where the source to build is located         | ""                         |
+| env-vars                  | array  | Environment variables to set during _build-time_                                | []                         |
+| platform-dir             | string | Name of the platform directory                                                  | "empty-dir"                |
+| user-id                   | string | User ID of the builder image user                                               | "1001"                     |
+| group-id                  | string | Group ID of the builder image user                                              | "1000"                     |
+| user-home                 | string | Absolute path to the user's home directory                                      | "/tekton/home"             |
+| cache-pvc-name            | string | Name of the Persistent Volume Claim for cache                                   | "ws-pvc"                   |
+| cnb-extender-kind         | string | The kind of image to extend ('build' or 'run')                                  | "build"                    |
+| cnb-extended-dir-exporter | string | Directory of extended layers, passed as -extended flag to the exporter         | "/layers/extended"         |
