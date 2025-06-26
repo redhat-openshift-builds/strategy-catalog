@@ -33,7 +33,7 @@ spec:
     - name: cnb-builder-image
       value: paketobuildpacks/builder-jammy-tiny:0.0.344
     - name: source-subpath
-      value: "buildpacks"
+      value: "buildpacks/nodejs"
   output:
     image: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
 ```
