@@ -1,7 +1,7 @@
 apiVersion: shipwright.io/v1beta1
 kind: ClusterBuildStrategy
 metadata:
-  name: buildpacks
+  name: buildpacks-extender
 spec:
   volumes:
     - name: layers-dir
@@ -204,6 +204,36 @@ spec:
       volumeMounts:
         - name: layers-dir
           mountPath: /layers
+        - name: cache-dir
+          mountPath: /cache
+        - name: kaniko-work-dir
+          mountPath: /kaniko
+    - name: extender
+      image: $(params.cnb-builder-image)
+      command: ["/cnb/lifecycle/extender"]
+      args:
+        - "-log-level"
+        - "$(params.cnb-log-level)"
+        - "-kind"
+        - "$(params.cnb-extender-kind)"
+        - "-layers"
+        - "/layers"
+        - "-platform"
+        - "/platform"
+        - "-analyzed"
+        - "/layers/analyzed.toml"
+        - "-generated"
+        - "/layers/generated"
+        - "-plan"
+        - "/layers/plan.toml"
+      env:
+        - name: CNB_PLATFORM_API
+          value: $(params.cnb-platform-api)
+      volumeMounts:
+        - name: layers-dir
+          mountPath: /layers
+        - name: empty-dir
+          mountPath: /platform
         - name: cache-dir
           mountPath: /cache
         - name: kaniko-work-dir

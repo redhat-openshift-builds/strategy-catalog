@@ -1,14 +1,14 @@
 # Buildpacks ClusterBuildStrategy
-The `buildpacks` ClusterBuildStrategy uses [buildpacks](https://buildpacks.io/) to efficiently build and push a container image based on the source code, without the need for a traditional Dockerfile. Instead of a Dockerfile, configuration details are provided through parameters in the `Build` resource.
-
+The `buildpacks-extender` ClusterBuildStrategy uses [buildpacks](https://buildpacks.io/) to efficiently build and push a container image based on the source code, without the need for a traditional Dockerfile. Instead of a Dockerfile, configuration details are provided through parameters in the `Build` resource.
+This strategy incorporates a buildpack extension phase, that allows you to modify the base images (builder or run images) used in the build process
 ## Install the Strategy
 
 ```
-$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/buildpacks/buildpacks.yaml
+$ oc apply -f https://raw.githubusercontent.com/redhat-developer/openshift-builds-catalog/main/clusterBuildStrategy/buildpacks-extender/buildpacks-extender.yaml
 ```
 
 ## Usage
-This example uses the buildpacks strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). This example also has support for "extender mode" which allows you to modify the builder or run image using a Dockerfile. This is useful for installing system dependencies or applying security configurations that standard buildpacks cannot. The Dockerfile is typically provided by a buildpack that supports extensions.
+This example uses the `buildpacks-extender` strategy to build an image, and pushes the built image to OpenShift's internal registry (`output.image`). This example also has support for "extender mode" which allows you to modify the builder or run image using a Dockerfile. This is useful for installing system dependencies or applying security configurations that standard buildpacks cannot. The Dockerfile is typically provided by a buildpack that supports extensions.
 To use the extender, you set the cnb-extender-kind parameter in your Build resource. The following example assumes the OpenShift internal registry is enabled and the `BuildRun` executes in the `buildpacks-example` namespace:
 
 
@@ -16,14 +16,14 @@ To use the extender, you set the cnb-extender-kind parameter in your Build resou
 apiVersion: shipwright.io/v1beta1
 kind: Build
 metadata:
-  name: buildpack-quarkus-build
+  name: buildpack-nodejs-build
 spec:
   source:
     type: Git
     git: 
       url: https://github.com/redhat-openshift-builds/samples.git
   strategy:
-    name: buildpacks
+    name: buildpacks-extender
     kind: ClusterBuildStrategy
   retention:
     atBuildDeletion: true
@@ -33,7 +33,7 @@ spec:
     - name: cnb-builder-image
       value: paketobuildpacks/builder-jammy-tiny:0.0.344
     - name: source-subpath
-      value: "buildpacks/quarkus"
+      value: "buildpacks/nodejs"
   output:
     image: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
 ```
