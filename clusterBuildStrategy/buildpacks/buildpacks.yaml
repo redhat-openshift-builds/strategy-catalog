@@ -65,7 +65,7 @@ spec:
       default: "/layers/extended"
   steps:
     - name: prepare
-      image: registry.access.redhat.com/ubi8/ubi:8.8-1067.1698056881
+      image: registry.access.redhat.com/ubi9/ubi@sha256:2e4eebec441e8bbc3459fcc83ddee0f7d3cfd219097b4110a37d7ff4fe0ff2e9
       args:
         - -c
         - |
@@ -278,7 +278,7 @@ spec:
         - name: empty-dir
           mountPath: /platform
     - name: results
-      image: registry.access.redhat.com/ubi8/ubi:8.8-1067.1698056881
+      image: registry.access.redhat.com/ubi9/ubi@sha256:2e4eebec441e8bbc3459fcc83ddee0f7d3cfd219097b4110a37d7ff4fe0ff2e9
       args:
         - -c
         - |
