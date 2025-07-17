@@ -33,7 +33,7 @@ spec:
     - name: cnb-builder-image
       value: paketobuildpacks/builder-jammy-tiny:0.0.344
     - name: source-subpath
-      value: "buildpacks/quarkus"
+      value: "buildpack/quarkus"
   output:
     image: image-registry.openshift-image-registry.svc:5000/buildpacks-example/taxi-app
 ```
