@@ -1,0 +1,18 @@
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build and release artifacts
+strategies.yaml
+
+# Logs and temp files
+*.log
+*.tmp
+tmp/
