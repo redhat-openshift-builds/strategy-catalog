@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - buildah/buildah.yaml
+  - buildpacks/buildpacks.yaml
+  - buildpacks-extender/buildpacks-extender.yaml
+  - source-to-image/source-to-image.yaml

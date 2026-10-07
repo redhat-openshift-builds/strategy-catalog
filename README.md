@@ -7,20 +7,20 @@ As the name indicates, a `ClusterBuildStrategy` is available cluster-wide, while
 
 ## Supportability scope of the ClusterBuildStrategies
 
-| Name | Supported platforms | scope |
-| ---- | ------------------- | ----- |
-| [buildah](./clusterBuildStrategy/buildah/) | all | Supported |
-| [source-to-image](./clusterBuildStrategy/source-to-image/) | linux/amd64 only | Supported |
-| [ubi-buildpacks](./clusterBuildStrategy/ubi-buildpacks) | all | Dev Preview |
+| Name                                                       | Supported platforms | scope       |
+|------------------------------------------------------------|---------------------|-------------|
+| [buildah](./clusterbuildstrategy/buildah/)                 | all                 | Supported   |
+| [source-to-image](./clusterbuildstrategy/source-to-image/) | linux/amd64 only    | Supported   |
+| [ubi-buildpacks](./clusterbuildstrategy/buildpacks)        | all                 | Dev Preview |
 
 ## Install ClusterBuildStrategies
 
 The following command will install all the available ClusterBuildStrategies in the cluster:
 ```
-$ oc apply -R -f clusterBuildStrategy
+$ oc apply -R -f clusterbuildstrategy
 ```
 
 In order to install a specific ClusterBuildStrategy, perform the following:
 ```
-$ oc apply -f clusterBuildStrategy/<strategy_name>
+$ oc apply -f clusterbuildstrategy/<strategy_name>
 ```
